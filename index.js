@@ -60,18 +60,18 @@ async function run() {
             const email = req.query.email;
             const query = {};
             if (email) {
-                query.email = email;
+                query.user_email = email;
             }
             const cursor = addtranstionCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         });
 
-        app.get("/addtranstion/:id", async(req, res) => {
+        app.delete("/addtranstion/:id", async(req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
-            const cursor = await productsCollection.findOne(query);
-            res.send(cursor);
+            const result = await productsCollection.deleteOne(query);
+            res.send(result);
         });
 
         app.post("/addtranstion", async(req, res) => {
