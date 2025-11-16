@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-require('dotenv').config();
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,8 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const uri =
-    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cewig2g.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cewig2g.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -30,43 +29,53 @@ async function run() {
         const addtranstionCollection = db.collection("addtranstion");
         const usersCollections = db.collection("users");
 
-        // Users API
+        // Users Update API
 
-        app.post("/users", async(req, res) => {
-            const newUser = req.body;
-            const email = req.body.email;
-            const query = { email: email };
-            const existingUser = await usersCollections.findOne(query);
-            if (existingUser) {
-                res.send({
-                    message: "user already exits. do not need to insert again",
-                });
-            } else {
-                const result = await usersCollections.insertOne(newUser);
-                res.send(result);
+        app.patch("/users/:email", async(req, res) => {
+            const email = req.params.email;
+            const updatedName = req.body.name;
+            const updatedPhoto = req.body.photo;
+
+            const filter = { email: email };
+            const updateDoc = {
+                $set: {
+                    name: updatedName,
+                    photo: updatedPhoto,
+                },
+            };
+            try {
+                const result = await usersCollections.updateOne(filter, updateDoc);
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ message: "User not found" });
+                }
+                res.send({ message: "User updated successfully", result });
+            } catch (error) {
+                res.status(500).send({ message: "Error updating user", error });
             }
         });
 
 
         // Transtion API
         app.get("/addtranstion", async(req, res) => {
-            const newTransition = req.body;
-            const result = await addtranstionCollection.insertOne(newTransition);
+            const email = req.query.email;
+            const query = {};
+            if (email) {
+                query.email = email;
+            }
+            const cursor = addtranstionCollection.find(query);
+            const result = await cursor.toArray();
             res.send(result);
         });
 
-        await client.db("admin").command({ ping: 1 });
-        console.log(
-            "Pinged your deployment. You successfully connected to MongoDB!"
-        );
-    } finally {}
-}
-run().catch(console.dir);
+        app.get("/addtranstion/:id", async(req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const cursor = await productsCollection.findOne(query);
+            res.send(cursor);
+        });
 
-app.get("/", (req, res) => {
-    res.send("financeflow Server is running");
-});
-
-app.listen(port, () => {
-    console.log(`financeflow server is running on port: ${port}`);
-});
+        app.post("/addtranstion", async(req, res) => {
+            const newAddTransition = req.body;
+            const result = await addtranstionCollection.insertOne(newAddTransition);
+            res.send(result);
+        });
