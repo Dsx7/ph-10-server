@@ -74,15 +74,37 @@ async function run() {
             res.send(cursor);
         });
 
+        app.patch("/addtranstion/:id", async(req, res) => {
+            const id = req.params.id;
+            const updatedTransaction = req.body;
+
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    type: updatedTransaction.type,
+                    category: updatedTransaction.category,
+                    amount: updatedTransaction.amount,
+                    description: updatedTransaction.description,
+                    date: updatedTransaction.date,
+                },
+            };
+            const result = await addtranstionCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        });
+
         app.delete("/addtranstion/:id", async(req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await addtranstionCollection.deleteOne(query);
             res.send(result);
         });
-
         app.post("/addtranstion", async(req, res) => {
             const newAddTransition = req.body;
             const result = await addtranstionCollection.insertOne(newAddTransition);
             res.send(result);
         });
+
+
+        await client.db("admin").command({ ping: 1 });
+        console.log(
+                "Pinged your deployment. You successfully connected to MongoDB!"
