@@ -47,7 +47,10 @@ const verifyFirebaseToken = async(req, res, next) => {
     }
 };
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cewig2g.mongodb.net/?appName=Cluster0`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cewig2g.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.7cwh8s9.mongodb.net/?appName=Cluster0`;
+
+// const uri = "mongodb+srv://finEaseDB:Zo1VYG4wQ5lNgWns@cluster0.jsnoqru.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -59,10 +62,10 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // await client.connect();
+        await client.connect();
 
-        const db = client.db("financeflowBDUser");
-        const addtranstionCollection = db.collection("addtranstion");
+        const db = client.db("finEaseDB");
+        const addtranstionCollection = db.collection("transtionAdded");
         const usersCollections = db.collection("users");
         // Users API
 
@@ -120,7 +123,7 @@ async function run() {
             res.send(result);
         });
 
-        app.get("/addtranstion/:id", async(req, res) => {
+        app.get("/transtionAdded/:id", async(req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const cursor = await addtranstionCollection.findOne(query);
@@ -167,7 +170,7 @@ async function run() {
             }
         });
 
-        app.patch("/addtranstion/:id", async(req, res) => {
+        app.patch("/transtionAdded/:id", async(req, res) => {
             const id = req.params.id;
             const updatedTransaction = req.body;
 
@@ -189,16 +192,17 @@ async function run() {
             const newAddTransition = req.body;
             const result = await addtranstionCollection.insertOne(newAddTransition);
             res.send(result);
+            // console.log(newAddTransition)
         });
 
-        app.delete("/addtranstion/:id", async(req, res) => {
+        app.delete("/transtionAdded/:id", async(req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await addtranstionCollection.deleteOne(query);
             res.send(result);
         });
 
-        // await client.db("admin").command({ ping: 1 });
+        await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"
         );

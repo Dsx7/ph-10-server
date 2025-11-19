@@ -1,0 +1,4 @@
+node_modules
+.env
+financeflow-firebas-admin.json
+.vercel
