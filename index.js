@@ -3,49 +3,49 @@ const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
-const admin = require("firebase-admin");
+// const admin = require("firebase-admin");
 const port = process.env.PORT || 3000;
 
-const decoded = Buffer.from(process.env.FIREBASE_SECRETE, "base64").toString(
-    "utf8"
-);
-const serviceAccount = JSON.parse(decoded);
+// const decoded = Buffer.from(process.env.FIREBASE_SECRETE, "base64").toString(
+//     "utf8"
+// );
+// const serviceAccount = JSON.parse(decoded);
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+// admin.initializeApp({
+//     credential: admin.credential.cert(serviceAccount),
+// });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-const logger = (req, res, next) => {
-    console.log("login info");
-    next();
-};
+// const logger = (req, res, next) => {
+//     console.log("login info");
+//     next();
+// };
 
-const verifyFirebaseToken = async(req, res, next) => {
-    console.log("in the verify middleware", req.headers.authorization);
+// const verifyFirebaseToken = async(req, res, next) => {
+//     console.log("in the verify middleware", req.headers.authorization);
 
-    if (!req.headers.authorization) {
-        return res.status(401).send({ message: "unauthorized access" });
-    }
+//     if (!req.headers.authorization) {
+//         return res.status(401).send({ message: "unauthorized access" });
+//     }
 
-    const token = req.headers.authorization.split(" ")[1];
-    if (!token) {
-        return res.status(401).send({ message: "unauthorized access" });
-    }
+//     const token = req.headers.authorization.split(" ")[1];
+//     if (!token) {
+//         return res.status(401).send({ message: "unauthorized access" });
+//     }
 
-    try {
-        const userInfoToken = await admin.auth().verifyIdToken(token);
-        console.log("after valid token", userInfoToken);
-        req.token_email = userInfoToken.email;
-        next();
-    } catch (error) {
-        console.error("Token verification error:", error);
-        return res.status(401).send({ message: "unauthorized access" });
-    }
-};
+//     try {
+//         const userInfoToken = await admin.auth().verifyIdToken(token);
+//         console.log("after valid token", userInfoToken);
+//         req.token_email = userInfoToken.email;
+//         next();
+//     } catch (error) {
+//         console.error("Token verification error:", error);
+//         return res.status(401).send({ message: "unauthorized access" });
+//     }
+// };
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cewig2g.mongodb.net/?appName=Cluster0`;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.7cwh8s9.mongodb.net/?appName=Cluster0`;
@@ -62,7 +62,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
 
         const db = client.db("finEaseDB");
         const addtranstionCollection = db.collection("transtionAdded");
@@ -110,7 +110,7 @@ async function run() {
         });
 
         // Transtion API
-        app.get("/addtranstion", logger, verifyFirebaseToken, async(req, res) => {
+        app.get("/addtranstion", async(req, res) => {
             const email = req.query.email;
             const query = {};
             if (email) {
@@ -131,7 +131,7 @@ async function run() {
         });
 
 
-        app.get("/category-total", verifyFirebaseToken, async(req, res) => {
+        app.get("/category-total", async(req, res) => {
             try {
                 const email = req.query.email;
                 const category = req.query.category;
@@ -188,11 +188,11 @@ async function run() {
             res.send(result);
         });
 
-        app.post("/addtranstion", async(req, res) => {
+        app.post("/transtionAdded", async(req, res) => {
             const newAddTransition = req.body;
             const result = await addtranstionCollection.insertOne(newAddTransition);
             res.send(result);
-            // console.log(newAddTransition)
+            console.log(newAddTransition)
         });
 
         app.delete("/transtionAdded/:id", async(req, res) => {
@@ -202,7 +202,7 @@ async function run() {
             res.send(result);
         });
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log(
             "Pinged your deployment. You successfully connected to MongoDB!"
         );
